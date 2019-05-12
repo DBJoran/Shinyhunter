@@ -167,10 +167,3 @@ def thresholdImage(mode, img):
         return cv2.threshold(img,127,255,cv2.THRESH_BINARY_INV)
     elif mode == 'bagname':
         return cv2.threshold(img,203,255,cv2.THRESH_BINARY)
-
-img = cv2.imread('./ocr files/digits/samples/1.png')
-for i in range(0,1000):
-    output = ocr('health', img)
-    if output != '21 21':
-        print('Wrong output: ' + output)
-        break

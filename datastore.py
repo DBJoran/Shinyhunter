@@ -7,7 +7,6 @@ def loadShinyList():
     return shinyList
     
 class ds:
-    exitFlag = 0
     bbox = 0
     screenshot = None
     walking = False
@@ -94,9 +93,3 @@ def getBbox():
     
 def setBbox(newval):
     ds.bbox = newval
-
-def getExitFlag():
-    return ds.exitFlag
-
-def setExitFlag(newval):
-    ds.exitFlag = newval

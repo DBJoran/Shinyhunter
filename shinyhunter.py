@@ -20,25 +20,6 @@ from collections import Counter
 # IMPORTANT, the OCR will not work if your screen is blurry
 # This script is ran at the following setting: Options > Video > x3
 
-bbox = {}
-sct = mss()
-inBattle = False
-shiny = False
-walking = False
-walkPosition = 0
-windowDimensions = {}
-# walkRange is the amount of steps to be taken, this does not include the tile
-# you are currently standing on. This means that the actual steps that are taken
-# is (walkRange + 1)
-walkRange = 3
-shinyList = []
-encounterCount = 0
-#BAG = 0
-#RUN = 1
-#POKEMON = 2
-#FIGHT = 3
-battleOption = 3
-
 # Load shinyList
 with open('shinylist.json') as f:
     shinyList = json.load(f)
@@ -56,34 +37,34 @@ def loadPokemon():
     # Press A to continue
     directkeys.keyPress(0x10)
     
-    global encounterCount
-    encounterCount = encounterCount + 1
-    print('Pokemons encountered: ' + str(encounterCount))
+    ds.incrEncounterCount()
+    print('Pokemons encountered: ' + str(ds.getEncounterCount()))
     # User will throw Pokeball on battlefield
     time.sleep(4)
 
 def leaveBattle():
     canEscape = False
     print('Health screenshot')
-    img = takeScreenShot()
+    toolkit.takeScreenshot()
+    img = ds.getScreenshot()
     currentHealth, maxHealth = ocr.ocr('health', img).split(' ')
 
     if int(currentHealth) < (int(maxHealth) / 2):
-        usePotion(battleOption)
+        usePotion(ds.getBattleOption())
 
     # Check battleOption here to make sure we are in the right order for the following keypresses
-    print(battleOption)
+    print(ds.getBattleOption())
     #Returns at bag
 
     # Move one down
     # Move from FIGHT to POKEMON
     directkeys.keyPress(0x1F)
-    changeBattleOption('POKEMON')
+    ds.setBattleOption(2)
 
     # Move one right
     # Move from POKEMON to RUN
     directkeys.keyPress(0x20)
-    changeBattleOption('RUN')
+    ds.setBattleOption(1)
 
     # Press A to leave
     # Press RUN
@@ -96,15 +77,18 @@ def leaveBattle():
     # We need this sleep to make sure the text is loaded
     # time.sleep(1)
     print('Escape screenshot')
-    img = takeScreenShot()
+    toolkit.takeScreenshot()
+    img = ds.getScreenshot()
     text = ocr.ocr('chat', img)
     if 'safely' in text:
-        canEscape = True
+        ds.setCanEscape(True)
 
-    while(canEscape == False):
+    while ds.getCanEscape() == False:
         # Make sure we can run safely
         print('Escape screenshot')
-        img = takeScreenShot()
+        toolkit.takeScreenshot()
+        img = ds.getScreenshot()
+
         text = ocr.ocr('chat', img)
     
         print(text)
@@ -121,16 +105,15 @@ def leaveBattle():
             # Press A to try to run away again
             directkeys.keyPress(0x10)
 
-            canEscape = False
+            ds.setCanEscape(False)
         else:
-            canEscape = True
+            ds.setCanEscape(True)
         
     # Got away safely!
     # Sleep for loading screen back to world
     time.sleep(3)
 
-    global inBattle 
-    inBattle = False
+    ds.setInBattle(False)
 
 # TODO: support for left and right, now there is only support for up and down
 def walk():
@@ -153,14 +136,11 @@ def walk():
 
     ds.setWalking(False)
 
-def takeScreenShot():
-    sct_img = sct.grab(bbox)
-    return np.array(sct_img)
-
 def checkShiny():
     x, y, shinyColor = getPokemonInfo()
     print('shiny screenshot')
-    img = takeScreenShot()
+    toolkit.takeScreenshot()
+    img = ds.getScreenshot()
     # OpenCV does YX and not XY
     colorPixel = img[y][x]
     color = str(colorPixel[2]) + str(colorPixel[1]) + str(colorPixel[0])
@@ -174,11 +154,12 @@ def checkShiny():
 
 def getPokemonInfo():
     print('info screenshot')
-    img = takeScreenShot()
+    toolkit.takeScreenshot()
+    img = ds.getScreenshot()
     pokemonName = ocr.ocr('pokemon',img).lower()
-    x = shinyList[pokemonName]['x']
-    y = shinyList[pokemonName]['y']
-    shinyColor = shinyList[pokemonName]['shinyColor']
+    x = ds.getShinyListX(pokemonName)
+    y = ds.getShinyListY(pokemonName)
+    shinyColor = ds.getShinyListColor(pokemonName)
 
     return x, y, shinyColor
 
@@ -267,15 +248,13 @@ def changeBattleOption(option):
     elif option == 'RUN':
         battleOption = 1
 
-# Improve this while condition with more statements
-while 1:
+while ds.getInBattle() == False:
     toolkit.takeScreenshot()
-    print(ds.getInBattle())
 
     if ds.getWalking() == False and ds.getInBattle() == False:
         walk()
 
-    # if inBattle == True:
-    #     loadPokemon()
-    #     checkShiny()
-    #     leaveBattle()
+    if ds.getInBattle() == True:
+        loadPokemon()
+        checkShiny()
+        leaveBattle()
