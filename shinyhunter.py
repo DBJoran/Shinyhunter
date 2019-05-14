@@ -16,6 +16,7 @@ from collections import Counter
 # TODO: You can only start the script walk script with your character facing north
 # Use openCV to solve this. Check which direction the character is facing and adjust the walk script for that direction
 # TODO: Split findwindow.py into windowmanager.py, one function for focus, one function for finding
+# TODO: Make script exit if the window loses focus
 # IMPORTANT, this script will not work if you use other colors then default VisualBoyAdvance colors
 # IMPORTANT, the OCR will not work if your screen is blurry
 # This script is ran at the following setting: Options > Video > x3
@@ -27,8 +28,8 @@ with open('shinylist.json') as f:
 # ===================================================================================
 # Actual functionality starts here :)
 
-# find the emulator window, focus the window and obtain the dimensions from the window
-# dimensions are needed for screenshots
+# Find the emulator window, focus the window and set the dimensions in the store
+# We need the dimensions for the screenshots
 ds.setBbox(toolkit.findWindow())
 
 def loadPokemon():
@@ -197,7 +198,8 @@ def usePotion(battleOption):
     # We are now in the bag
     time.sleep(1)
     print('bagname screenshot')
-    img = takeScreenShot()
+    toolkit.takeScreenshot()
+    img = ds.getScreenshot()
     bagName = ocr.ocr('bagname', img)
     print(bagName)
 

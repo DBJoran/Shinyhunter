@@ -6,12 +6,12 @@ import cropper
 
 #IMPORTANT: Q does not work properly, this is caused by the fact that the Q is very close to the following character
 #e.g. QR will be seen as one 'character', we can't do predictions on this 'character'
-# It's very important to know the OCR currently only works on a dark background.
 
-# @mode, either 'health', 'chat' or 'pokemon'
+# @mode, either 'health', 'chat', 'pokemon' or 'bagname'
 # chat, the box where you will see 'Got away safely!' etc. This is the box you see when in battle. 
 # health, the box where your POKéMONS health will be displayed
 # pokemon, the box where the name of the POKéMON you are battling against is displayed
+# bagname, the box where the name of the bag is displayed. e.g. ITEMS, KEY ITEMS or POKé BALLS
 # @img, the full image taken by the screenshot function
 def ocr(mode, img):
     processQueue = cropper.crop(mode, img)
@@ -90,15 +90,17 @@ def ocr(mode, img):
             
             text = text + prediction
 
-            if spaceRequired(x1,w1,x2) == True:
-                text = text + ' '
+            # Sometimes we get the following error: 'local variable 'x2' referenced before assignment'
+            if type(rect2) != None:
+                if spaceRequired(x1,w1,x2) == True:
+                    text = text + ' '
     # if text == '':
         # raise ValueError('No text found. Are you sure you are using the correct mode?')
     return text
 
 def spaceRequired(x1, w1, x2):
     difference = x2 - (x1 + w1)
-    if (difference > 10 ):
+    if difference > 10:
         return True
     else: 
         return False
@@ -108,6 +110,8 @@ def cleanBoundingBoxes(boundingBoxes):
     # Fixes '!' and '?'
     bbList = list(boundingBoxes)
     for k in range(0, len(boundingBoxes)):
+
+        #TODO: Check this statement, If im correct this statement is never reached cause it already exits the loop at (k - 1)
         if k == len(boundingBoxes):
             return boundingBoxes
 
