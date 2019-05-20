@@ -45,27 +45,28 @@ def loadPokemon():
 
 def leaveBattle():
     canEscape = False
-    print('Health screenshot')
     toolkit.takeScreenshot()
     img = ds.getScreenshot()
-    currentHealth, maxHealth = ocr.ocr('health', img).split(' ')
+    # Sometimes we can not find the health properly, try finding the health again if we get a ValueError
+    # NOTE: this could either be related to not being able to find the space for the split
+    # or the image is not good enough to ocr on, this might be caused by the screen fading in and out in battle
+    # TODO: Maybe do some while loop here?
 
-    if int(currentHealth) < (int(maxHealth) / 2):
-        usePotion(ds.getBattleOption())
-
-    # Check battleOption here to make sure we are in the right order for the following keypresses
     print(ds.getBattleOption())
-    #Returns at bag
+    
+    # try:
+    #     currentHealth, maxHealth = ocr.ocr('health', img).split(' ')
+    # except ValueError:
+    #     toolkit.takeScreenshot()
+    #     img = ds.getScreenshot()
+    #     cv2.imwrite('errorimg.png', img)
+    #     currentHealth, maxHealth = ocr.ocr('health', img).split(' ')
 
-    # Move one down
-    # Move from FIGHT to POKEMON
-    directkeys.keyPress(0x1F)
-    ds.setBattleOption(2)
+    # if int(currentHealth) < (int(maxHealth) / 2):
+    #     usePotion(ds.getBattleOption())
 
-    # Move one right
-    # Move from POKEMON to RUN
-    directkeys.keyPress(0x20)
-    ds.setBattleOption(1)
+    # Move to RUN
+    moveToBattleOption(ds.getBattleOption(), 'RUN')
 
     # Press A to leave
     # Press RUN
@@ -77,7 +78,6 @@ def leaveBattle():
 
     # We need this sleep to make sure the text is loaded
     # time.sleep(1)
-    print('Escape screenshot')
     toolkit.takeScreenshot()
     img = ds.getScreenshot()
     text = ocr.ocr('chat', img)
@@ -86,7 +86,6 @@ def leaveBattle():
 
     while ds.getCanEscape() == False:
         # Make sure we can run safely
-        print('Escape screenshot')
         toolkit.takeScreenshot()
         img = ds.getScreenshot()
 
@@ -116,8 +115,98 @@ def leaveBattle():
 
     ds.setInBattle(False)
 
+def getHeading():
+    toolkit.takeScreenshot()
+    img = ds.getScreenshot()
+    centerPixel = img[282][367]
+    color = str(centerPixel[2]) + str(centerPixel[1]) + str(centerPixel[0])
+    if color == '1044040':
+        ds.setHeading('N')
+    elif color == '16812064':
+        ds.setHeading('E')
+    elif color == '5656120':
+        ds.setHeading('S')
+    elif color == '216144112':
+        ds.setHeading('W')
+
+def moveToBattleOption(currentPosition, newPosition):
+    # FIGHT > BAG
+    if currentPosition == 'FIGHT' and newPosition == 'BAG':
+        # Move right
+        directkeys.keyPress(0x20)
+        ds.setBattleOption('BAG')
+    # FIGHT > RUN
+    if currentPosition == 'FIGHT' and newPosition == 'RUN':
+        # Move down
+        directkeys.keyPress(0x1F)
+        # Move right
+        directkeys.keyPress(0x20)
+        ds.setBattleOption('RUN')
+    # FIGHT > POKEMON
+    if currentPosition == 'FIGHT' and newPosition == 'POKEMON':
+        # Move down
+        directkeys.keyPress(0x20)
+        ds.setBattleOption('POKEMON')
+
+    # POKEMON > BAG
+    if currentPosition == 'POKEMON' and newPosition == 'BAG':
+        # Move right
+        directkeys.keyPress(0x20)
+        # Move up
+        directkeys.keyPress(0x11)
+        ds.setBattleOption('BAG')
+    # POKEMON > RUN
+    if currentPosition == 'POKEMON' and newPosition == 'RUN':
+        # Move right
+        directkeys.keyPress(0x20)
+        ds.setBattleOption('RUN')
+    # POKEMON > FIGHT
+    if currentPosition == 'POKEMON' and newPosition == 'FIGHT':
+        # Move up
+        directkeys.keyPress(0x11)
+        ds.setBattleOption('FIGHT')
+
+    # RUN > BAG
+    if currentPosition == 'RUN' and newPosition == 'BAG':
+        # Move up
+        directkeys.keyPress(0x11)
+        ds.setBattleOption('BAG')
+    # RUN > POKEMON
+    if currentPosition == 'RUN' and newPosition == 'POKEMON':
+        # Move left
+        directkeys.keyPress(0x1E)
+        ds.setBattleOption('POKEMON')
+    # RUN > FIGHT
+    if currentPosition == 'RUN' and newPosition == 'FIGHT':
+        # Move left
+        directkeys.keyPress(0x1E)
+        # Move up 
+        directkeys.keyPress(0x11)
+        ds.setBattleOption('FIGHT')
+
+    # BAG > RUN
+    if currentPosition == 'BAG' and newPosition == 'RUN':
+        # Move down
+        directkeys.keyPress(0x20)
+        ds.setBattleOption('RUN')
+    # BAG > POKEMON
+    if currentPosition == 'BAG' and newPosition == 'POKEMON':
+        # Move down
+        directkeys.keyPress(0x20)
+        # Move left
+        directkeys.keyPress(0x1E)
+        ds.setBattleOption('POKEMON')
+    # BAG > FIGHT
+    if currentPosition == 'BAG' and newPosition == 'FIGHT':
+        # Move left
+        directkeys.keyPress(0x1E)
+        ds.setBattleOption('FIGHT')
+    
 # TODO: support for left and right, now there is only support for up and down
 def walk():
+
+    getHeading()
+
     ds.setWalking(True)
 
     # Sleep for 0.2 seconds every step
@@ -139,13 +228,11 @@ def walk():
 
 def checkShiny():
     x, y, shinyColor = getPokemonInfo()
-    print('shiny screenshot')
     toolkit.takeScreenshot()
     img = ds.getScreenshot()
     # OpenCV does YX and not XY
     colorPixel = img[y][x]
     color = str(colorPixel[2]) + str(colorPixel[1]) + str(colorPixel[0])
-    print(color)
     if color == str(shinyColor):
         print('shiny!')
         # Terminate the script here
@@ -154,7 +241,6 @@ def checkShiny():
         print('no shiny')
 
 def getPokemonInfo():
-    print('info screenshot')
     toolkit.takeScreenshot()
     img = ds.getScreenshot()
     pokemonName = ocr.ocr('pokemon',img).lower()
@@ -168,40 +254,16 @@ def usePotion(battleOption):
     # Steps here to take potion
     print('use potion from bag. While supply lasts?')
     #TODO: Make sure we have a potion in our bag, if not exit the script
-    # BAG
-    if battleOption == 0:
-        # Press A (Q)
-        directkeys.keyPress(0x10)
-    # RUN
-    if battleOption == 1:
-        # Move arrow up (W)
-        directkeys.keyPress(0x11)
-        # Press A (Q)
-        directkeys.keyPress(0x10)
-    # POKéMON
-    elif battleOption == 2:
-        # Move arrow up (W)
-        directkeys.keyPress(0x11)
-        # Move arrow to the right (D)
-        directkeys.keyPress(0x20)
-        # Press A (Q)
-        directkeys.keyPress(0x10)
-    # FIGHT
-    elif battleOption == 3:
-        # Move arrow to the right (D)
-        directkeys.keyPress(0x20)
-        # Press A (Q)
-        directkeys.keyPress(0x10)
 
-    changeBattleOption('BAG')
-
+    moveToBattleOption(ds.getBattleOption(), 'BAG')
+    # Press A (Q)
+    directkeys.keyPress(0x10)
+   
     # We are now in the bag
     time.sleep(1)
-    print('bagname screenshot')
     toolkit.takeScreenshot()
     img = ds.getScreenshot()
     bagName = ocr.ocr('bagname', img)
-    print(bagName)
 
     # Check if we are on the right page, we need to be on the ITEMS page. add ocr shizzle my nizzle
     if bagName == 'ITEMS':
@@ -238,18 +300,6 @@ def usePotion(battleOption):
     # Time sleep couple of seconds for the enemy to do a attack
     time.sleep(10)
 
-# @option, the battleOption where the ingame cursor is currently positioned at
-def changeBattleOption(option):
-    global battleOption
-    if option == 'FIGHT':
-        battleOption = 3
-    elif option == 'BAG':
-        battleOption = 0
-    elif option == 'POKEMON':
-        battleOption = 2
-    elif option == 'RUN':
-        battleOption = 1
-
 while ds.getInBattle() == False:
     toolkit.takeScreenshot()
 
@@ -257,6 +307,8 @@ while ds.getInBattle() == False:
         walk()
 
     if ds.getInBattle() == True:
+        # Set to FIGHT cause FIGHT is default and we just started a new battle
+        ds.setBattleOption('FIGHT')
         loadPokemon()
         checkShiny()
         leaveBattle()

@@ -16,15 +16,18 @@ class ds:
     encounterCount = 0
     shinyList = loadShinyList()
     canEscape = False
-    battleOption = 3
+    battleOption = 'FIGHT'
+    heading = 'N'
+
+def getHeading():
+    return ds.heading
+
+def setHeading(newval):
+    ds.heading = newval
 
 def getBattleOption():
     return ds.battleOption
 
-# BAG = 0
-# RUN = 1
-# POKEMON = 2
-# FIGHT = 3
 def setBattleOption(newval):
     ds.battleOption = newval
 

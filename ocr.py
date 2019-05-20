@@ -91,7 +91,7 @@ def ocr(mode, img):
             text = text + prediction
 
             # Sometimes we get the following error: 'local variable 'x2' referenced before assignment'
-            if type(rect2) != None:
+            if type(rect2) == tuple:
                 if spaceRequired(x1,w1,x2) == True:
                     text = text + ' '
     # if text == '':
