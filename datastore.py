@@ -18,7 +18,21 @@ class ds:
     canEscape = False
     battleOption = 'FIGHT'
     heading = 'N'
+    currentHealth = 0
+    maxHealth = 0
 
+def getCurrentHealth():
+    return ds.currentHealth
+
+def setCurrentHealth(newval):
+    ds.currentHealth = newval
+
+def getMaxHealth():
+    return ds.maxHealth
+
+def setMaxHealth(newval):
+    ds.maxHealth = newval
+    
 def getHeading():
     return ds.heading
 

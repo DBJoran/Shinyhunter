@@ -15,7 +15,6 @@ from collections import Counter
 
 # TODO: You can only start the script walk script with your character facing north
 # Use openCV to solve this. Check which direction the character is facing and adjust the walk script for that direction
-# TODO: Split findwindow.py into windowmanager.py, one function for focus, one function for finding
 # TODO: Make script exit if the window loses focus
 # IMPORTANT, this script will not work if you use other colors then default VisualBoyAdvance colors
 # IMPORTANT, the OCR will not work if your screen is blurry
@@ -44,73 +43,47 @@ def loadPokemon():
     time.sleep(4)
 
 def leaveBattle():
-    canEscape = False
+    ds.setCanEscape(False)
+    
     toolkit.takeScreenshot()
     img = ds.getScreenshot()
-    # Sometimes we can not find the health properly, try finding the health again if we get a ValueError
-    # NOTE: this could either be related to not being able to find the space for the split
-    # or the image is not good enough to ocr on, this might be caused by the screen fading in and out in battle
-    # TODO: Maybe do some while loop here?
+    currentHealth, maxHealth = ocr.ocr('health', img).split(' ')
+    ds.setCurrentHealth(int(currentHealth))
+    ds.setMaxHealth(int(maxHealth))
 
-    print(ds.getBattleOption())
+    if int(ds.getCurrentHealth()) < math.floor(int(ds.getMaxHealth()) / 2):
+        usePotion()
     
-    # try:
-    #     currentHealth, maxHealth = ocr.ocr('health', img).split(' ')
-    # except ValueError:
-    #     toolkit.takeScreenshot()
-    #     img = ds.getScreenshot()
-    #     cv2.imwrite('errorimg.png', img)
-    #     currentHealth, maxHealth = ocr.ocr('health', img).split(' ')
-
-    # if int(currentHealth) < (int(maxHealth) / 2):
-    #     usePotion(ds.getBattleOption())
-
-    # Move to RUN
     moveToBattleOption(ds.getBattleOption(), 'RUN')
 
     # Press A to leave
     # Press RUN
-    directkeys.keyPress(0x10)
-
-    # Press A to leave
-    time.sleep(1.5)
-    directkeys.keyPress(0x10)
-
-    # We need this sleep to make sure the text is loaded
-    # time.sleep(1)
-    toolkit.takeScreenshot()
-    img = ds.getScreenshot()
-    text = ocr.ocr('chat', img)
-    if 'safely' in text:
-        ds.setCanEscape(True)
-
     while ds.getCanEscape() == False:
-        # Make sure we can run safely
+        # Make sure we are our battleOption is RUN, if not move to RUN
+        if ds.getBattleOption() == 'RUN':
+            directkeys.keyPress(0x10)
+        else:
+            moveToBattleOption(ds.getBattleOption(), 'RUN')
+            directkeys.keyPress(0x10)
+
+        time.sleep(1.5)
+
+        # We just tried to run, we need to take a screenshot to know if we have can leave safely
         toolkit.takeScreenshot()
         img = ds.getScreenshot()
-
         text = ocr.ocr('chat', img)
-    
-        print(text)
-
-        # Check if we can run
-        if 'escape' in text:
-
+        # If we can't leave we will have to text 'Can't escape' 
+        if 'escape' not in text:
+            ds.setCanEscape(True)
             # Press A to dismiss text
             directkeys.keyPress(0x10)
-
-            # Pokemon will do attack
-            time.sleep(5)
-
-            # Press A to try to run away again
-            directkeys.keyPress(0x10)
-
-            ds.setCanEscape(False)
+            break
         else:
-            ds.setCanEscape(True)
-        
-    # Got away safely!
-    # Sleep for loading screen back to world
+            ds.setCanEscape(False)
+            # Press A to dismiss text
+            directkeys.keyPress(0x10)
+        # Enemy will do attack
+        time.sleep(5)
     time.sleep(3)
 
     ds.setInBattle(False)
@@ -145,7 +118,7 @@ def moveToBattleOption(currentPosition, newPosition):
     # FIGHT > POKEMON
     if currentPosition == 'FIGHT' and newPosition == 'POKEMON':
         # Move down
-        directkeys.keyPress(0x20)
+        directkeys.keyPress(0x1F)
         ds.setBattleOption('POKEMON')
 
     # POKEMON > BAG
@@ -187,12 +160,12 @@ def moveToBattleOption(currentPosition, newPosition):
     # BAG > RUN
     if currentPosition == 'BAG' and newPosition == 'RUN':
         # Move down
-        directkeys.keyPress(0x20)
+        directkeys.keyPress(0x1F)
         ds.setBattleOption('RUN')
     # BAG > POKEMON
     if currentPosition == 'BAG' and newPosition == 'POKEMON':
         # Move down
-        directkeys.keyPress(0x20)
+        directkeys.keyPress(0x1F)
         # Move left
         directkeys.keyPress(0x1E)
         ds.setBattleOption('POKEMON')
@@ -250,9 +223,7 @@ def getPokemonInfo():
 
     return x, y, shinyColor
 
-def usePotion(battleOption):
-    # Steps here to take potion
-    print('use potion from bag. While supply lasts?')
+def usePotion():
     #TODO: Make sure we have a potion in our bag, if not exit the script
 
     moveToBattleOption(ds.getBattleOption(), 'BAG')
@@ -265,7 +236,7 @@ def usePotion(battleOption):
     img = ds.getScreenshot()
     bagName = ocr.ocr('bagname', img)
 
-    # Check if we are on the right page, we need to be on the ITEMS page. add ocr shizzle my nizzle
+    # Check if we are on the right page, we need to be on the ITEMS page
     if bagName == 'ITEMS':
         # Press arrow up
         directkeys.keyPress(0x11)
@@ -299,6 +270,7 @@ def usePotion(battleOption):
 
     # Time sleep couple of seconds for the enemy to do a attack
     time.sleep(10)
+    # moveToBattleOption(ds.getBattleOption(), 'FIGHT')
 
 while ds.getInBattle() == False:
     toolkit.takeScreenshot()
