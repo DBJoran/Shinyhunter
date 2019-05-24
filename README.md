@@ -35,15 +35,12 @@ Start| Enter
 ## Usage
 
 1. Go to a grassy area with atleast 4 blocks of space (vertical)
-2. Make sure your character is on the most northern block and facing north
-3. Run the Python (shinyhunter.py) script. 
-4. Profit. Shinyhunter will now look keep looking for shiny Pokémons. When a shiny is found the script will be executed, so the user can catch the shiny himself.
+2. Run the Python (shinyhunter.py) script. 
+3. Profit. Shinyhunter will now look keep looking for shiny Pokémons. When a shiny is found the script will be executed, so the user can catch the shiny himself.
 ---
 
 
 ## Future features
-* Detect which way the player is facing so the player does not have to face north when starting the script
-* Detect when players Pokémon is low health and heal automatically
 * Add more supported shiny Pokémons
 * Add more advanced movements (currently we can only walk vertical)
 * Add custom controls

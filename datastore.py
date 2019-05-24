@@ -17,7 +17,7 @@ class ds:
     shinyList = loadShinyList()
     canEscape = False
     battleOption = 'FIGHT'
-    heading = 'N'
+    direction = None
     currentHealth = 0
     maxHealth = 0
 
@@ -33,10 +33,10 @@ def getMaxHealth():
 def setMaxHealth(newval):
     ds.maxHealth = newval
     
-def getHeading():
+def getDirection():
     return ds.heading
 
-def setHeading(newval):
+def setDirection(newval):
     ds.heading = newval
 
 def getBattleOption():

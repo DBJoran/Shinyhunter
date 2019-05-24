@@ -88,19 +88,19 @@ def leaveBattle():
 
     ds.setInBattle(False)
 
-def getHeading():
+def getDirection():
     toolkit.takeScreenshot()
     img = ds.getScreenshot()
     centerPixel = img[282][367]
     color = str(centerPixel[2]) + str(centerPixel[1]) + str(centerPixel[0])
-    if color == '1044040':
-        ds.setHeading('N')
+    if color == '1044040' or color == '1206464':
+        ds.setDirection('N')
     elif color == '16812064':
-        ds.setHeading('E')
+        ds.setDirection('E')
     elif color == '5656120':
-        ds.setHeading('S')
+        ds.setDirection('S')
     elif color == '216144112':
-        ds.setHeading('W')
+        ds.setDirection('W')
 
 def moveToBattleOption(currentPosition, newPosition):
     # FIGHT > BAG
@@ -177,9 +177,6 @@ def moveToBattleOption(currentPosition, newPosition):
     
 # TODO: support for left and right, now there is only support for up and down
 def walk():
-
-    getHeading()
-
     ds.setWalking(True)
 
     # Sleep for 0.2 seconds every step
@@ -271,6 +268,12 @@ def usePotion():
     # Time sleep couple of seconds for the enemy to do a attack
     time.sleep(10)
     # moveToBattleOption(ds.getBattleOption(), 'FIGHT')
+
+
+# If the user is not pointing north, make the user point north before starting
+getDirection()
+if ds.getDirection() != 'N':
+    directkeys.keyPress(0x11)
 
 while ds.getInBattle() == False:
     toolkit.takeScreenshot()
