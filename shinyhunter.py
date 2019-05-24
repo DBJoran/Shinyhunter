@@ -35,7 +35,7 @@ def loadPokemon():
     # Sleep for loading screen
     time.sleep(4)
     # Press A to continue
-    directkeys.keyPress(0x10)
+    directkeys.keyPress(ds.getControls()['gba-a'])
     
     ds.incrEncounterCount()
     print('Pokemons encountered: ' + str(ds.getEncounterCount()))
@@ -61,10 +61,10 @@ def leaveBattle():
     while ds.getCanEscape() == False:
         # Make sure we are our battleOption is RUN, if not move to RUN
         if ds.getBattleOption() == 'RUN':
-            directkeys.keyPress(0x10)
+            directkeys.keyPress(ds.getControls()['gba-a'])
         else:
             moveToBattleOption(ds.getBattleOption(), 'RUN')
-            directkeys.keyPress(0x10)
+            directkeys.keyPress(ds.getControls()['gba-a'])
 
         time.sleep(1.5)
 
@@ -76,12 +76,12 @@ def leaveBattle():
         if 'escape' not in text:
             ds.setCanEscape(True)
             # Press A to dismiss text
-            directkeys.keyPress(0x10)
+            directkeys.keyPress(ds.getControls()['gba-a'])
             break
         else:
             ds.setCanEscape(False)
             # Press A to dismiss text
-            directkeys.keyPress(0x10)
+            directkeys.keyPress(ds.getControls()['gba-a'])
         # Enemy will do attack
         time.sleep(5)
     time.sleep(3)
@@ -106,73 +106,73 @@ def moveToBattleOption(currentPosition, newPosition):
     # FIGHT > BAG
     if currentPosition == 'FIGHT' and newPosition == 'BAG':
         # Move right
-        directkeys.keyPress(0x20)
+        directkeys.keyPress(ds.getControls()['right'])
         ds.setBattleOption('BAG')
     # FIGHT > RUN
     if currentPosition == 'FIGHT' and newPosition == 'RUN':
         # Move down
-        directkeys.keyPress(0x1F)
+        directkeys.keyPress(ds.getControls()['down'])
         # Move right
-        directkeys.keyPress(0x20)
+        directkeys.keyPress(ds.getControls()['right'])
         ds.setBattleOption('RUN')
     # FIGHT > POKEMON
     if currentPosition == 'FIGHT' and newPosition == 'POKEMON':
         # Move down
-        directkeys.keyPress(0x1F)
+        directkeys.keyPress(ds.getControls()['down'])
         ds.setBattleOption('POKEMON')
 
     # POKEMON > BAG
     if currentPosition == 'POKEMON' and newPosition == 'BAG':
         # Move right
-        directkeys.keyPress(0x20)
+        directkeys.keyPress(ds.getControls()['right'])
         # Move up
-        directkeys.keyPress(0x11)
+        directkeys.keyPress(ds.getControls()['up'])
         ds.setBattleOption('BAG')
     # POKEMON > RUN
     if currentPosition == 'POKEMON' and newPosition == 'RUN':
         # Move right
-        directkeys.keyPress(0x20)
+        directkeys.keyPress(ds.getControls()['right'])
         ds.setBattleOption('RUN')
     # POKEMON > FIGHT
     if currentPosition == 'POKEMON' and newPosition == 'FIGHT':
         # Move up
-        directkeys.keyPress(0x11)
+        directkeys.keyPress(ds.getControls()['up'])
         ds.setBattleOption('FIGHT')
 
     # RUN > BAG
     if currentPosition == 'RUN' and newPosition == 'BAG':
         # Move up
-        directkeys.keyPress(0x11)
+        directkeys.keyPress(ds.getControls()['up'])
         ds.setBattleOption('BAG')
     # RUN > POKEMON
     if currentPosition == 'RUN' and newPosition == 'POKEMON':
         # Move left
-        directkeys.keyPress(0x1E)
+        directkeys.keyPress(ds.getControls()['left'])
         ds.setBattleOption('POKEMON')
     # RUN > FIGHT
     if currentPosition == 'RUN' and newPosition == 'FIGHT':
         # Move left
-        directkeys.keyPress(0x1E)
+        directkeys.keyPress(ds.getControls()['left'])
         # Move up 
-        directkeys.keyPress(0x11)
+        directkeys.keyPress(ds.getContorls()['up'])
         ds.setBattleOption('FIGHT')
 
     # BAG > RUN
     if currentPosition == 'BAG' and newPosition == 'RUN':
         # Move down
-        directkeys.keyPress(0x1F)
+        directkeys.keyPress(ds.getControls()['down'])
         ds.setBattleOption('RUN')
     # BAG > POKEMON
     if currentPosition == 'BAG' and newPosition == 'POKEMON':
         # Move down
-        directkeys.keyPress(0x1F)
+        directkeys.keyPress(ds.getControls()['down'])
         # Move left
-        directkeys.keyPress(0x1E)
+        directkeys.keyPress(ds.getControls()['left'])
         ds.setBattleOption('POKEMON')
     # BAG > FIGHT
     if currentPosition == 'BAG' and newPosition == 'FIGHT':
         # Move left
-        directkeys.keyPress(0x1E)
+        directkeys.keyPress(ds.getControls()['left'])
         ds.setBattleOption('FIGHT')
     
 # TODO: support for left and right, now there is only support for up and down
@@ -187,11 +187,11 @@ def walk():
         ds.setWalkPosition(0)
 
     if ds.getWalkPosition() > ds.getWalkRange():
-        directkeys.keyPress(0x11)
+        directkeys.keyPress(ds.getControls()['up'])
         ds.incrWalkPosition()
         
     if ds.getWalkPosition() <= ds.getWalkRange():
-        directkeys.keyPress(0x1F)
+        directkeys.keyPress(ds.getControls()['down'])
         ds.incrWalkPosition()
 
     ds.setWalking(False)
@@ -225,7 +225,7 @@ def usePotion():
 
     moveToBattleOption(ds.getBattleOption(), 'BAG')
     # Press A (Q)
-    directkeys.keyPress(0x10)
+    directkeys.keyPress(ds.getControls()['gba-a'])
    
     # We are now in the bag
     time.sleep(1)
@@ -236,44 +236,43 @@ def usePotion():
     # Check if we are on the right page, we need to be on the ITEMS page
     if bagName == 'ITEMS':
         # Press arrow up
-        directkeys.keyPress(0x11)
+        directkeys.keyPress(ds.getControls()['up'])
     elif bagName == 'KEY ITEMS':
         # Press A to move to left in the bag
-        directkeys.keyPress(0x1E)
+        directkeys.keyPress(ds.getControls()['left'])
         # Press arrow up
-        directkeys.keyPress(0x11)
+        directkeys.keyPress(ds.getControls()['up'])
     elif bagName == 'POKé BALLS':
         # Press A to move to left in the bag
-        directkeys.keyPress(0x1E)
+        directkeys.keyPress(ds.getControls()['left'])
         # Press A to move to left in the bag
-        directkeys.keyPress(0x1E)
+        directkeys.keyPress(ds.getControls()['left'])
         # Press arrow up
-        directkeys.keyPress(0x11)
+        directkeys.keyPress(ds.getControls()['up'])
 
     # Press A to select
-    directkeys.keyPress(0x10)
+    directkeys.keyPress(ds.getControls()['gba-a'])
     time.sleep(1)
 
     # Press A to use
-    directkeys.keyPress(0x10)
+    directkeys.keyPress(ds.getControls()['gba-a'])
     time.sleep(1)
 
     # Press A to use on Pokemon
-    directkeys.keyPress(0x10)   
+    directkeys.keyPress(ds.getControls()['gba-a'])   
     time.sleep(5)
 
     # Press A again to dismiss chat message
-    directkeys.keyPress(0x10)
+    directkeys.keyPress(ds.getControls()['gba-a'])
 
     # Time sleep couple of seconds for the enemy to do a attack
     time.sleep(10)
-    # moveToBattleOption(ds.getBattleOption(), 'FIGHT')
-
 
 # If the user is not pointing north, make the user point north before starting
 getDirection()
 if ds.getDirection() != 'N':
-    directkeys.keyPress(0x11)
+    directkeys.keyPress(ds.getControls()['up'])
+controls = ds.getControls()
 
 while ds.getInBattle() == False:
     toolkit.takeScreenshot()

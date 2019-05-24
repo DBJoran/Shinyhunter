@@ -1,11 +1,19 @@
 import json
+import yaml
 
 def loadShinyList():
     shinyList = []
     with open('shinylist.json') as f:
         shinyList = json.load(f)
     return shinyList
-    
+
+def loadControls():
+    controls = {}
+    with open("config.yaml", 'r') as stream:
+        config = yaml.safe_load(stream)
+        controls = config['controls']
+        return controls
+
 class ds:
     bbox = 0
     screenshot = None
@@ -20,6 +28,10 @@ class ds:
     direction = None
     currentHealth = 0
     maxHealth = 0
+    controls = loadControls()
+
+def getControls():
+    return ds.controls
 
 def getCurrentHealth():
     return ds.currentHealth
@@ -34,10 +46,10 @@ def setMaxHealth(newval):
     ds.maxHealth = newval
     
 def getDirection():
-    return ds.heading
+    return ds.direction
 
 def setDirection(newval):
-    ds.heading = newval
+    ds.direction = newval
 
 def getBattleOption():
     return ds.battleOption
