@@ -15,9 +15,13 @@ A list of supported shiny Pokémon can be found [here](/shinylist.json).
 ## Setup
 1. Download VisualBoyAdvance [here](http://www.emulator-zone.com/doc.php/gba/vboyadvance.html).
 
-2. To use Shinyhunter we will need to change the default controls of VisualBoyAdvance. 
+2. Pip install all the Python dependencies
 
-3. Go to: **Options > Joypad > Configure > 1**
+    `pip install -r requirement.txt`
+
+3. To use Shinyhunter we will need to change the default controls of VisualBoyAdvance. 
+
+4. Go to: **Options > Joypad > Configure > 1**
 
 Control | Mapping |
 --- | --- |
@@ -25,17 +29,18 @@ Up| W
 Down| S
 Left| A
 Right| D
-Button A| Q
-Button B| Backspace
-Start| Enter
+GBA A Button| Q
 
-4. Change the video mode, go to: **Options > Video > x3**
-5. Change the color mode, go to: **Options > Gameboy > Real Colors**
+These are the default controls of Shinyhunter, if you'd like to use different controls you will have to change it in VisualBoyAdvance and in the **config.yaml** file.
+
+
+5. Change the video mode, go to: **Options > Video > x3**
+6. Change the color mode, go to: **Options > Gameboy > Real Colors**
 ---
 ## Usage
 
 1. Go to a grassy area with atleast 4 blocks of space (vertical)
-2. Run the Python (shinyhunter.py) script. 
+2. Run the Python (shinyhunter.py) script.
 3. Profit. Shinyhunter will now look keep looking for shiny Pokémons. When a shiny is found the script will be executed, so the user can catch the shiny himself.
 ---
 
@@ -43,7 +48,6 @@ Start| Enter
 ## Future features
 * Add more supported shiny Pokémons
 * Add more advanced movements (currently we can only walk vertical)
-* Add custom controls
 ---
 
 ## Tech stack

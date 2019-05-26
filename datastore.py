@@ -2,17 +2,13 @@ import json
 import yaml
 
 def loadShinyList():
-    shinyList = []
     with open('shinylist.json') as f:
-        shinyList = json.load(f)
-    return shinyList
+        return json.load(f)
 
 def loadControls():
-    controls = {}
     with open("config.yaml", 'r') as stream:
         config = yaml.safe_load(stream)
-        controls = config['controls']
-        return controls
+        return config['controls']
 
 class ds:
     bbox = 0
