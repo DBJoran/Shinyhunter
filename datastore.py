@@ -10,6 +10,11 @@ def loadControls():
         config = yaml.safe_load(stream)
         return config['controls']
 
+def loadConfig():
+    with open("config.yaml", 'r') as stream:
+        config = yaml.safe_load(stream)
+        return config['config']
+
 class ds:
     bbox = 0
     screenshot = None
@@ -25,6 +30,10 @@ class ds:
     currentHealth = 0
     maxHealth = 0
     controls = loadControls()
+    config = loadConfig()
+
+def getConfig():
+	return ds.config
 
 def getControls():
     return ds.controls

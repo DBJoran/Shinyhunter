@@ -41,9 +41,9 @@ def ocr(mode, img):
         for j in range(0, len(boundingBoxes)):
             floating = False
             rect1 = boundingBoxes[j]
-            #TODO: rect2 is only used for x2, for spaceRequired() can we decide spaces differently so we can remove the rect2 var
             rect2 = None
             area = rect1[2] * rect1[3]
+
             # Filter out the small dots
             # Filter out the arrow down character
             if area < 10 or rect1[2] > 20 : continue
@@ -90,12 +90,10 @@ def ocr(mode, img):
             
             text = text + prediction
 
-            # Sometimes we get the following error: 'local variable 'x2' referenced before assignment'
             if type(rect2) == tuple:
                 if spaceRequired(x1,w1,x2) == True:
                     text = text + ' '
-    # if text == '':
-        # raise ValueError('No text found. Are you sure you are using the correct mode?')
+
     return text
 
 def spaceRequired(x1, w1, x2):
@@ -167,7 +165,7 @@ def thresholdImage(mode, img):
             return cv2.threshold(img,127,255,cv2.THRESH_BINARY_INV)            
         else:
             return cv2.threshold(img,127,255,cv2.THRESH_BINARY)
-    elif mode == 'health' or mode == 'pokemon':
+    elif mode == 'health' or mode == 'pokemon' or 'itemname' in mode:
         return cv2.threshold(img,127,255,cv2.THRESH_BINARY_INV)
     elif mode == 'bagname':
         return cv2.threshold(img,203,255,cv2.THRESH_BINARY)

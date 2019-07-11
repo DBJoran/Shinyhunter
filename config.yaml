@@ -6,3 +6,6 @@ controls:
   left: a
   right: d
   gba-a: q
+config:
+  bag-items: 50
+  heal-item: potion

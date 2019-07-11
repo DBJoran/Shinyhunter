@@ -13,8 +13,6 @@ from mss import mss
 from PIL import Image
 from collections import Counter
 
-# TODO: You can only start the script walk script with your character facing north
-# Use openCV to solve this. Check which direction the character is facing and adjust the walk script for that direction
 # TODO: Make script exit if the window loses focus
 # IMPORTANT, this script will not work if you use other colors then default VisualBoyAdvance colors
 # IMPORTANT, the OCR will not work if your screen is blurry
@@ -52,7 +50,7 @@ def leaveBattle():
     ds.setMaxHealth(int(maxHealth))
 
     if int(ds.getCurrentHealth()) < math.floor(int(ds.getMaxHealth()) / 2):
-        usePotion()
+        healPokemon()
     
     moveToBattleOption(ds.getBattleOption(), 'RUN')
 
@@ -220,18 +218,18 @@ def getPokemonInfo():
 
     return x, y, shinyColor
 
-def usePotion():
-    #TODO: Make sure we have a potion in our bag, if not exit the script
-
+def healPokemon():
     moveToBattleOption(ds.getBattleOption(), 'BAG')
     # Press A (Q)
     directkeys.keyPress(ds.getControls()['gba-a'])
    
     # We are now in the bag
+    # Make sure we have a potion
     time.sleep(1)
     toolkit.takeScreenshot()
     img = ds.getScreenshot()
     bagName = ocr.ocr('bagname', img)
+    print(bagName)
 
     # Check if we are on the right page, we need to be on the ITEMS page
     if bagName == 'ITEMS':
@@ -250,6 +248,8 @@ def usePotion():
         # Press arrow up
         directkeys.keyPress(ds.getControls()['up'])
 
+    checkItems(ds.getConfig()['heal-item'])
+    
     # Press A to select
     directkeys.keyPress(ds.getControls()['gba-a'])
     time.sleep(1)
@@ -268,6 +268,79 @@ def usePotion():
     # Time sleep couple of seconds for the enemy to do a attack
     time.sleep(10)
 
+# @item, the item that has to be checked if its in the bag
+# TODO: Check if this still works with only 3 items in the bag
+def checkItems(item):
+    print('Searching for ' + item)
+    itemFound = False
+    previousItem = ''
+
+    # Go all the way to thes top of the bag
+    print(type(ds.getConfig()['bag-items']))
+    for i in range(0, ds.getConfig()['bag-items']):
+        time.sleep(0.25)
+        directkeys.keyPress(ds.getControls()['up'])
+
+    print('first three')
+    for i in range(0, 3):
+        time.sleep(0.25)
+        toolkit.takeScreenshot()
+        img = ds.getScreenshot()
+        itemName = ocr.ocr('itemname' + str(i + 1), img)
+
+        if itemName.lower() == item.lower():
+            itemFound = True
+            break
+
+        print(previousItem.lower())
+        print(itemName.lower())
+        if previousItem.lower() != itemName.lower():
+            print('down')
+            directkeys.keyPress(ds.getControls()['down'])
+        
+        previousItem = itemName
+
+    print('middle')
+    while itemFound == False:
+        time.sleep(0.25)
+        print('---------------')
+        toolkit.takeScreenshot()
+        img = ds.getScreenshot()
+        itemName = ocr.ocr('itemname4', img)
+
+        if itemName.lower() == item.lower():
+            itemFound = True
+            # print('item found!')
+            return True
+
+        print(previousItem.lower())
+        print(itemName.lower())
+        if previousItem.lower() != itemName.lower():
+            print('down')
+            directkeys.keyPress(ds.getControls()['down'])
+
+        # Check if we have reached the bottom if we have CANCEL as last 'item' in the list
+        lastItem = ocr.ocr('itemname6', img)
+        if lastItem.lower() == 'cancel':
+            break
+
+        previousItem = itemName
+        
+
+    directkeys.keyPress(ds.getControls()['down'])
+    print('down last item')
+    time.sleep(0.25)
+    toolkit.takeScreenshot()
+    img = ds.getScreenshot()
+    itemName = ocr.ocr('itemname5', img)
+    if itemName.lower() == item.lower():
+        itemFound = True
+        print('itemfound')
+        return True
+        
+    # if itemFound == False:
+        # raise RuntimeError('The item: "' + item + '" was not found in the bag!')
+        
 # If the user is not pointing north, make the user point north before starting
 getDirection()
 if ds.getDirection() != 'N':
