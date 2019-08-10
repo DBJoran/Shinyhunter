@@ -45,11 +45,35 @@ def leaveBattle():
     
     toolkit.takeScreenshot()
     img = ds.getScreenshot()
-    currentHealth, maxHealth = ocr.ocr('health', img).split(' ')
-    ds.setCurrentHealth(int(currentHealth))
-    ds.setMaxHealth(int(maxHealth))
+    # epoch = int(time.time())
+    # Save image to make sure we are screenshotting the right screen at that time
+    #   currentHealth, maxHealth = ocr.ocr('health', img).split(' ')
+    #   ValueError: not enough values to unpack (expected 2, got 1)
+
+    # OCR is broken for health, no '/' support
+    # Adding '/' support should fix the problem
+    # cv2.imwrite('health-test/' +str(epoch) + '.png', img)
+    # ds.setCurrentHealth(int(currentHealth))
+    # ds.setMaxHealth(int(maxHealth))
+
+    health = ocr.ocr('health', img).split(' ')
+
+    # TODO: This comment is not right anymore!!
+    # Sometimes the OCR doesn't recognize the health properly
+    # A proper return string looks something like this: '127 227'. 127 is the Pokemon's his current health and 227 is its max health
+    # Sometimes we get '127227' returned from the OCR. Note that it didnt catch the space in the middle between the current health and max health
+    # If that happens we need to take a new screenshot and try it again until it returns a proper string (like mentioned above). 
+
+    while len(health) == 1:
+        toolkit.takeScreenshot()
+        img = ds.getScreenshot()
+        health = ocr.ocr('health', img).split(' ')
+
+    ds.setCurrentHealth(int(health[0]))
+    ds.setMaxHealth(int(health[1]))
 
     if int(ds.getCurrentHealth()) < math.floor(int(ds.getMaxHealth()) / 2):
+        print("healing...")        
         healPokemon()
     
     moveToBattleOption(ds.getBattleOption(), 'RUN')
@@ -64,27 +88,47 @@ def leaveBattle():
             moveToBattleOption(ds.getBattleOption(), 'RUN')
             directkeys.keyPress(ds.getControls()['gba-a'])
 
-        time.sleep(1.5)
+        time.sleep(3)
 
-        # We just tried to run, we need to take a screenshot to know if we have can leave safely
+        # We just tried to run, we need to take a screenshot to know if we can leave safely
         toolkit.takeScreenshot()
         img = ds.getScreenshot()
+        epoch = int(time.time())
+        cv2.imwrite('leave-test/' +str(epoch) + '.png', img)
         text = ocr.ocr('chat', img)
+        print(text)
+
         # If we can't leave we will have to text 'Can't escape' 
         if 'escape' not in text:
             ds.setCanEscape(True)
+
             # Press A to dismiss text
             directkeys.keyPress(ds.getControls()['gba-a'])
-            break
+            # We will now exit the WHILE loop
+
         else:
             ds.setCanEscape(False)
-            # Press A to dismiss text
-            directkeys.keyPress(ds.getControls()['gba-a'])
-        # Enemy will do attack
-        time.sleep(5)
-    time.sleep(3)
 
-    ds.setInBattle(False)
+        # Press A to dismiss text
+        directkeys.keyPress(ds.getControls()['gba-a'])
+
+        # Enemy will do attack        
+        time.sleep(10)
+
+    # Before we set the inBattle status we need to make sure we are actually not in battle anymore
+    # we can do this by checking the far right bottom corner for color
+    toolkit.takeScreenshot()
+    img = ds.getScreenshot()
+    height, width = img.shape[:2]
+    centerPixel = img[(height - 10)][(width - 10)]
+    color = str(centerPixel[2]) + str(centerPixel[1]) + str(centerPixel[0])
+
+    if color != '404848':
+        ds.setInBattle(False)
+    else:
+        ds.setInBattle(True)
+
+    print('done')
 
 def getDirection():
     toolkit.takeScreenshot()
@@ -152,7 +196,7 @@ def moveToBattleOption(currentPosition, newPosition):
         # Move left
         directkeys.keyPress(ds.getControls()['left'])
         # Move up 
-        directkeys.keyPress(ds.getContorls()['up'])
+        directkeys.keyPress(ds.getControls()['up'])
         ds.setBattleOption('FIGHT')
 
     # BAG > RUN
@@ -280,6 +324,8 @@ def checkItems(item):
     for i in range(0, ds.getConfig()['bag-items']):
         time.sleep(0.25)
         directkeys.keyPress(ds.getControls()['up'])
+
+
 
     print('first three')
     for i in range(0, 3):

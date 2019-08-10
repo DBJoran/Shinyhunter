@@ -63,23 +63,6 @@ def crop(mode, img):
         croppedImg.append(itemname6)
         return croppedImg
 
-    # Crops all the possible positions of our item selection arrow
-    #   POTION
-    #   ANTIDOTE
-    # > BURN HEAL
-    #   PARALYZ HEAL
-    # In return we get 6 images cropped images, only 1 image contains the arrow.
-    elif mode == 'itemarrow':
-        arrow = img[85: 360 , math.floor(width / 2 - 95): 299]
-        arrow0 = img[85: 117 , math.floor(width / 2 - 95): 299]
-        arrow1 = img[132: 164 , math.floor(width / 2 - 95): 299]
-        arrow2 = img[181: 213 , math.floor(width / 2 - 95): 299]
-        arrow3 = img[228: 260 , math.floor(width / 2 - 95): 299]
-        arrow4 = img[277: 309 , math.floor(width / 2 - 95): 299]
-        arrow5 = img[324: 356 , math.floor(width / 2 - 95): 299]
-        croppedImg.extend([arrow0, arrow1, arrow2, arrow3, arrow4, arrow5])
-        return croppedImg
-
     else:
         raise ValueError('Unsupported crop mode.')
 

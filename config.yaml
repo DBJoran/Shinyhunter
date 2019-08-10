@@ -8,4 +8,4 @@ controls:
   gba-a: q
 config:
   bag-items: 50
-  heal-item: potion
+  heal-item: berry juice
