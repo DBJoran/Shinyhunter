@@ -42,27 +42,16 @@ def loadPokemon():
 
 def leaveBattle():
     ds.setCanEscape(False)
-    
     toolkit.takeScreenshot()
     img = ds.getScreenshot()
-    # epoch = int(time.time())
-    # Save image to make sure we are screenshotting the right screen at that time
-    #   currentHealth, maxHealth = ocr.ocr('health', img).split(' ')
-    #   ValueError: not enough values to unpack (expected 2, got 1)
-
-    # OCR is broken for health, no '/' support
-    # Adding '/' support should fix the problem
-    # cv2.imwrite('health-test/' +str(epoch) + '.png', img)
-    # ds.setCurrentHealth(int(currentHealth))
-    # ds.setMaxHealth(int(maxHealth))
-
     health = ocr.ocr('health', img).split(' ')
 
-    # TODO: This comment is not right anymore!!
     # Sometimes the OCR doesn't recognize the health properly
-    # A proper return string looks something like this: '127 227'. 127 is the Pokemon's his current health and 227 is its max health
-    # Sometimes we get '127227' returned from the OCR. Note that it didnt catch the space in the middle between the current health and max health
-    # If that happens we need to take a new screenshot and try it again until it returns a proper string (like mentioned above). 
+    # The OCR function returns an array list. For a Pokemon with 127 current hp and a max hp of 227 something like the following should be returned
+    # expected output (when it goes right): ['127', '227']
+    # expected output (when it goes WRONG): ['127227']
+    # If the output is wrong we should expect a array length of 1, if it goes right we should expect a array length of 2
+    # If we happen to get a array length of 1 we need to take a new screenshot and try it again until it returns a proper array with a lenght of 2 (like mentioned above).
 
     while len(health) == 1:
         toolkit.takeScreenshot()
@@ -88,7 +77,7 @@ def leaveBattle():
             moveToBattleOption(ds.getBattleOption(), 'RUN')
             directkeys.keyPress(ds.getControls()['gba-a'])
 
-        time.sleep(3)
+        time.sleep(6)
 
         # We just tried to run, we need to take a screenshot to know if we can leave safely
         toolkit.takeScreenshot()
@@ -112,8 +101,9 @@ def leaveBattle():
         # Press A to dismiss text
         directkeys.keyPress(ds.getControls()['gba-a'])
 
-        # Enemy will do attack        
-        time.sleep(10)
+        # Enemy will do attack
+        # TODO: Decrease this timeout, 10 works fine, but I think we could also do with a couple seconds less of timeout
+        time.sleep(9)
 
     # Before we set the inBattle status we need to make sure we are actually not in battle anymore
     # we can do this by checking the far right bottom corner for color
@@ -221,7 +211,7 @@ def moveToBattleOption(currentPosition, newPosition):
 def walk():
     ds.setWalking(True)
 
-    # Sleep for 0.2 seconds every step
+    # Sleep for 0.25 seconds every step
     # Decreasing the sleep time even more will make the steps innacurate
     time.sleep(.25)
 

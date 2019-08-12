@@ -72,7 +72,7 @@ def predictSelectedImage(img):
         dfFeatures = pd.DataFrame(getFeatures(img)) 
         
         # transform the features use our scaler
-        X = finalScaler.transform(dfFeatures);
+        X = finalScaler.transform(dfFeatures)
 
         # use our classifier to predict the data
         prediction = finalClassifier.predict(X)
