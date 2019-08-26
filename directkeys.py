@@ -1,10 +1,10 @@
+import ctypes
+import time
+
 # direct inputs
 # source to this solution and code:
 # http://stackoverflow.com/questions/14489013/simulate-python-keypresses-for-controlling-a-game
 # http://www.gamespp.com/directx/directInputKeyboardScanCodes.html
-
-import ctypes
-import time
 
 codes = { 
     'q': 0x10, 
@@ -84,6 +84,14 @@ def ReleaseKey(hexKeyCode):
     ctypes.windll.user32.SendInput(1, ctypes.pointer(x), ctypes.sizeof(x))
 
 # https://www.reddit.com/r/learnpython/comments/22tke1/use_python_to_send_keystrokes_to_games_in_windows/
+"""
+Simulates a keypress. The string thats passed to the function will be used to obtain the hex code from the dictionary.
+
+Parameters
+----------
+key : string
+    The key you want to press as a string, if you want to press A you pass the string 'A'.
+"""
 def keyPress(key):
     key = key.lower()
     hexKeyCode = codes[key]

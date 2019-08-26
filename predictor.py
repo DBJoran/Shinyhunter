@@ -66,19 +66,16 @@ def predictSelectedImage(img):
     if img is None:
         print('No img given')
         return
-    try:
+    
+    # get the features of the selected image
+    dfFeatures = pd.DataFrame(getFeatures(img)) 
+    
+    # transform the features use our scaler
+    X = finalScaler.transform(dfFeatures)
 
-        # get the features of the selected image
-        dfFeatures = pd.DataFrame(getFeatures(img)) 
-        
-        # transform the features use our scaler
-        X = finalScaler.transform(dfFeatures);
+    # use our classifier to predict the data
+    prediction = finalClassifier.predict(X)
 
-        # use our classifier to predict the data
-        prediction = finalClassifier.predict(X)
-
-        # print('Prediction: ', prediction)
-        # print('Answer: ', label)
-        return prediction[0]
-    except IOError:
-        print ('No file at "./dataset-images/' + fileName + '.png"')
+    # print('Prediction: ', prediction)
+    # print('Answer: ', label)
+    return prediction[0]

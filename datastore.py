@@ -5,18 +5,31 @@ def loadShinyList():
     with open('shinylist.json') as f:
         return json.load(f)
 
-def loadControls():
-    with open("config.yaml", 'r') as stream:
-        config = yaml.safe_load(stream)
-        return config['controls']
-
 def loadConfig():
     with open("config.yaml", 'r') as stream:
         config = yaml.safe_load(stream)
-        return config['config']
+        return config['config'], config['controls']
 
+"""
+bbox : the bounding box for the screenshots
+screenshot : the placeholder of the screenshot
+walking : if the player is currently moving or not
+walkPosition : how many steps the player has taken in the walkRange
+    everytime the user takes one step the walkPosition gets incremented
+walkRange : the amount of tiles the user will walk
+inBattle : if the user is currently battling or not
+encounterCount : how many Pokemons the user has encountered
+shinyList : a list containing all the information for shiny checking
+canEscape : if the user can escape the battle (against a wild Pokemon) or not
+battleOption : which battleOption is selected during battle
+direction : the direction the user is headed. e.g: N (North), W (West) etc.
+currentHealth : the current health from the Pokemon the user is battling with (not against)
+maxHealth :  the max health from the Pokemon the user is battling with (not against)
+config : stores all the config information from the config.yaml
+controls: stores all the controls information from the config.yaml
+"""
 class ds:
-    bbox = 0
+    bbox = None
     screenshot = None
     walking = False
     walkPosition = 0
@@ -29,8 +42,7 @@ class ds:
     direction = None
     currentHealth = 0
     maxHealth = 0
-    controls = loadControls()
-    config = loadConfig()
+    config, controls = loadConfig()
 
 def getConfig():
 	return ds.config

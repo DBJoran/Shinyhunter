@@ -16,19 +16,32 @@ from collections import Counter
 # TODO: Make script exit if the window loses focus
 # IMPORTANT, this script will not work if you use other colors then default VisualBoyAdvance colors
 # IMPORTANT, the OCR will not work if your screen is blurry
-# This script is ran at the following setting: Options > Video > x3
+
+# This script is ran at the following settings: 
+# Options > Video > x3
+# Options > Video > Render Method > Direct 3D
+# Options > Gameboy > Real Colors
 
 # Load shinyList
 with open('shinylist.json') as f:
     shinyList = json.load(f)
-
-# ===================================================================================
-# Actual functionality starts here :)
+    
+"""
+===================================================================================
+Actual functionality starts here :)
+"""
 
 # Find the emulator window, focus the window and set the dimensions in the store
 # We need the dimensions for the screenshots
 ds.setBbox(toolkit.findWindow())
 
+"""
+This function interacts with the loading screen
+It waits 4 seconds, after those four seconds it will press the A button to skip the first dialogue
+
+The encounter count will be incremented, after this we will wait another four seconds before we do anything, 
+during these four seconds the player will throw his Pokeball on the battlefield
+"""
 def loadPokemon():
     # Sleep for loading screen
     time.sleep(4)
@@ -40,29 +53,19 @@ def loadPokemon():
     # User will throw Pokeball on battlefield
     time.sleep(4)
 
+#TODO: documentation
 def leaveBattle():
     ds.setCanEscape(False)
-    
     toolkit.takeScreenshot()
     img = ds.getScreenshot()
-    # epoch = int(time.time())
-    # Save image to make sure we are screenshotting the right screen at that time
-    #   currentHealth, maxHealth = ocr.ocr('health', img).split(' ')
-    #   ValueError: not enough values to unpack (expected 2, got 1)
-
-    # OCR is broken for health, no '/' support
-    # Adding '/' support should fix the problem
-    # cv2.imwrite('health-test/' +str(epoch) + '.png', img)
-    # ds.setCurrentHealth(int(currentHealth))
-    # ds.setMaxHealth(int(maxHealth))
-
     health = ocr.ocr('health', img).split(' ')
 
-    # TODO: This comment is not right anymore!!
     # Sometimes the OCR doesn't recognize the health properly
-    # A proper return string looks something like this: '127 227'. 127 is the Pokemon's his current health and 227 is its max health
-    # Sometimes we get '127227' returned from the OCR. Note that it didnt catch the space in the middle between the current health and max health
-    # If that happens we need to take a new screenshot and try it again until it returns a proper string (like mentioned above). 
+    # The OCR function returns an array list. For a Pokemon with 127 current hp and a max hp of 227 something like the following should be returned
+    # expected output (when it goes right): ['127', '227']
+    # expected output (when it goes WRONG): ['127227']
+    # If the output is wrong we should expect a array length of 1, if it goes right we should expect a array length of 2
+    # If we happen to get a array length of 1 we need to take a new screenshot and try it again until it returns a proper array with a lenght of 2 (like mentioned above).
 
     while len(health) == 1:
         toolkit.takeScreenshot()
@@ -88,7 +91,7 @@ def leaveBattle():
             moveToBattleOption(ds.getBattleOption(), 'RUN')
             directkeys.keyPress(ds.getControls()['gba-a'])
 
-        time.sleep(3)
+        time.sleep(6)
 
         # We just tried to run, we need to take a screenshot to know if we can leave safely
         toolkit.takeScreenshot()
@@ -112,9 +115,10 @@ def leaveBattle():
         # Press A to dismiss text
         directkeys.keyPress(ds.getControls()['gba-a'])
 
-        # Enemy will do attack        
-        time.sleep(10)
-
+        # Enemy will do attack
+        # TODO: Decrease this timeout, 10 works fine, but I think we could also do with a couple seconds less of timeout
+        time.sleep(9)
+        
     # Before we set the inBattle status we need to make sure we are actually not in battle anymore
     # we can do this by checking the far right bottom corner for color
     toolkit.takeScreenshot()
@@ -130,11 +134,17 @@ def leaveBattle():
 
     print('done')
 
+"""
+Obtains the direction the user is pointing, by checking the color of a single pixel to see in which direction the user is pointing
+The pixel will have a different color for each direction the user is pointing at.
+
+"""
 def getDirection():
     toolkit.takeScreenshot()
     img = ds.getScreenshot()
     centerPixel = img[282][367]
     color = str(centerPixel[2]) + str(centerPixel[1]) + str(centerPixel[0])
+
     if color == '1044040' or color == '1206464':
         ds.setDirection('N')
     elif color == '16812064':
@@ -144,6 +154,26 @@ def getDirection():
     elif color == '216144112':
         ds.setDirection('W')
 
+"""
+When the user is in battle we have four options:
+- FIGHT 
+- BAG
+- POKEMON
+- RUN
+
+This function will move the cursor to the correct battle option.
+Everytime we move to a new battle option we set the battleOption variable with the current selected battle option
+Because we save the current selected battle option everytime we know where the cursor is without having to check it with computer vision
+
+Parameters
+----------
+currentPosition : string
+    The currently selected battle option e.g. 'BAG'
+
+newPosition : string
+    The battle option that has to be selected e.g. 'FIGHT'
+
+"""
 def moveToBattleOption(currentPosition, newPosition):
     # FIGHT > BAG
     if currentPosition == 'FIGHT' and newPosition == 'BAG':
@@ -221,7 +251,7 @@ def moveToBattleOption(currentPosition, newPosition):
 def walk():
     ds.setWalking(True)
 
-    # Sleep for 0.2 seconds every step
+    # Sleep for 0.25 seconds every step
     # Decreasing the sleep time even more will make the steps innacurate
     time.sleep(.25)
 
@@ -238,6 +268,45 @@ def walk():
 
     ds.setWalking(False)
 
+"""
+Here we obtain all the information required for the checking of a shiny.
+First we take a screenshot and obtain the name of the Pokemon we are battling against.
+
+With this name we obtain the required information from the Shinylist stored in the datastore (ds)
+
+Returns
+-------
+
+x : int
+    The X coordinates of the pixel we have to check. Each Pokemon has a specific pixel on which we decide if the Pokemon is shiny or not
+    e.g. 250
+
+y : int
+    The Y coordinates of the pixel we have to check. Each Pokemon has a specific pixel on which we decide if the Pokemon is shiny or not
+    e.g. 120
+
+shinyColor : int
+    The color the pixel has to be if we have encountered a shiny Pokemon. The color is a RGB value concatted as a int.
+    e.g. [168, 152, 88] turns into 16815288
+"""
+def getPokemonInfo():
+    toolkit.takeScreenshot()
+    img = ds.getScreenshot()
+    pokemonName = ocr.ocr('pokemon',img).lower()
+    x = ds.getShinyListX(pokemonName)
+    y = ds.getShinyListY(pokemonName)
+    shinyColor = ds.getShinyListColor(pokemonName)
+
+    return x, y, shinyColor
+
+"""
+Obtains the X coordinate, Y coordinate and the color the pixel has to be.
+
+With the information we have obtained we check at the X and Y coordinate to 
+see if the pixel color matches the obtained shinyColor.
+
+If we have a match (a shiny) the script will be executed and the user can catch the Pokemon himself.
+"""
 def checkShiny():
     x, y, shinyColor = getPokemonInfo()
     toolkit.takeScreenshot()
@@ -252,23 +321,29 @@ def checkShiny():
     else: 
         print('no shiny')
 
-def getPokemonInfo():
-    toolkit.takeScreenshot()
-    img = ds.getScreenshot()
-    pokemonName = ocr.ocr('pokemon',img).lower()
-    x = ds.getShinyListX(pokemonName)
-    y = ds.getShinyListY(pokemonName)
-    shinyColor = ds.getShinyListColor(pokemonName)
+"""
+Will heal your Pokemon. 
+We select the bag and go into the bag, after we are in the bag we need to navigate to the right page inside the bag
+The bag has several different pages inside it:
+- ITEMS
+- KEY ITEMS
+- POKEMONS
+We need to be at the ITEMS page, if we are on any different page we will navigate to the right page.
 
-    return x, y, shinyColor
+After we have arrived at the ITEMS page we need to check if our preffered heal item is actually available in our bag
+this will be done with the checkItems() function. To see how checkItems() works check out the documentation of that function.
 
+checkItems() now puts the cursor at the right heal item, now we select the item, use the item and use the item on our Pokemon
+the game will now display a chat message saying we have healed our Pokemon, we will now dismiss this message.
+
+The final step is to sleep for 10 seconds and let the enemy do his attack.
+"""
 def healPokemon():
     moveToBattleOption(ds.getBattleOption(), 'BAG')
     # Press A (Q)
     directkeys.keyPress(ds.getControls()['gba-a'])
    
-    # We are now in the bag
-    # Make sure we have a potion
+    # We are now in the bag, make sure we have a potion
     time.sleep(1)
     toolkit.takeScreenshot()
     img = ds.getScreenshot()
@@ -314,6 +389,34 @@ def healPokemon():
 
 # @item, the item that has to be checked if its in the bag
 # TODO: Check if this still works with only 3 items in the bag
+# TODO: Return False if the item has not been found, ALSO UPDATE DOCUMENTATION
+
+""" 
+Checks if the passed item is in the bag.
+We will need to go to the top of our bag, we actually don't know how many items the users has thus we don't know how many items we need to move up in the bag.
+Because we don't know how many items we need to go up in the bag we take the predefined 'bag-items' from the config.yaml. 
+The default value is 50, the script will try to move 50 times up to the top off the bag. If you have less items in your bag you can change this value in the config.yaml and the script will be slightly faster.
+
+Scrolling in the bag works on a special way, the first three items will not be in the center of the screen thus we cannot do the same procedure for these items. We will screenshot the item and OCR it
+and move on to the next item until we have done the first three. After we have done the first three items we will proceed with the next items.
+The next items follow the same procedure, screenshot, crop, ocr and check if the ocr results match the item we will be looking for.
+The last three items in the bag will follow the same procedure as the first three items in the bag, the only difference is that the last three items will have a different 
+crop mode then the first three items.
+
+If we have found the correct healing item we will return True
+Parameters 
+----------
+
+item : String
+    the item that has to be checked if its in the bag. e.g: Potion, Berry Juice.
+    the item has to be a item that can heal a Pokemon.
+
+Returns
+-------
+
+Boolean
+    True, if we have found the item
+"""
 def checkItems(item):
     print('Searching for ' + item)
     itemFound = False
