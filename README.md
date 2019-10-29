@@ -35,7 +35,8 @@ These are the default controls of Shinyhunter, if you'd like to use different co
 
 
 5. Change the video mode, go to: **Options > Video > x3**
-6. Change the color mode, go to: **Options > Gameboy > Real Colors**
+6. Change the render mode, go to: **Options > Video > Render Method > Direct 3D**
+7. Change the color mode, go to: **Options > Gameboy > Real Colors**
 ---
 ## Usage
 
@@ -51,6 +52,9 @@ These are the default controls of Shinyhunter, if you'd like to use different co
 ---
 
 ## Tech stack
+
+### [Python 3.7](https://www.python.org/downloads/release/python-370/)
+
 ### [OpenCV-Python](https://pypi.org/project/opencv-python/)
 For image manipulation/detection I use OpenCV-Python. By using OpenCV-Python we can get the color of a certain pixels. With the color we can decide if there is a shiny Pokémon or not.
 
