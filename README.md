@@ -8,16 +8,20 @@
 ## About
 Shinyhunter is a bot that will search/hunt for shiny Pokémon in Pokémon Leaf Green and Fire Red. Shinyhunter uses the VisualBoyAdvance-1.8.0-beta3 emulator for this. 
 
-A list of supported shiny Pokémon can be found [here](/shinyList.json).
+A list of supported shiny Pokémon can be found [here](/shinylist.json).
 
 ---
 
 ## Setup
 1. Download VisualBoyAdvance [here](http://www.emulator-zone.com/doc.php/gba/vboyadvance.html).
 
-2. To use Shinyhunter we will need to change the default controls of VisualBoyAdvance. 
+2. Pip install all the Python dependencies
 
-3. Go to: **Options > Joypad > Configure > 1**
+    `pip install -r requirement.txt`
+
+3. To use Shinyhunter we will need to change the default controls of VisualBoyAdvance. 
+
+4. Go to: **Options > Joypad > Configure > 1**
 
 Control | Mapping |
 --- | --- |
@@ -25,31 +29,32 @@ Up| W
 Down| S
 Left| A
 Right| D
-Button A| Q
-Button B| Backspace
-Start| Enter
+GBA A Button| Q
 
-4. Change the video mode, go to: **Options > Video > x3**
-5. Change the color mode, go to: **Options > Gameboy > Real Colors**
+These are the default controls of Shinyhunter, if you'd like to use different controls you will have to change it in VisualBoyAdvance and in the **config.yaml** file.
+
+
+5. Change the video mode, go to: **Options > Video > x3**
+6. Change the render mode, go to: **Options > Video > Render Method > Direct 3D**
+7. Change the color mode, go to: **Options > Gameboy > Real Colors**
 ---
 ## Usage
 
 1. Go to a grassy area with atleast 4 blocks of space (vertical)
-2. Make sure your character is on the most northern block and facing north
-3. Run the Python (shinyhunter.py) script. 
-4. Profit. Shinyhunter will now look keep looking for shiny Pokémons. When a shiny is found the script will be executed, so the user can catch the shiny himself.
+2. Run the Python (shinyhunter.py) script.
+3. Profit. Shinyhunter will now look keep looking for shiny Pokémons. When a shiny is found the script will be executed, so the user can catch the shiny himself.
 ---
 
 
 ## Future features
-* Detect which way the player is facing so the player does not have to face north when starting the script
-* Detect when players Pokémon is low health and heal automatically
 * Add more supported shiny Pokémons
 * Add more advanced movements (currently we can only walk vertical)
-* Add custom controls
 ---
 
 ## Tech stack
+
+### [Python 3.7](https://www.python.org/downloads/release/python-370/)
+
 ### [OpenCV-Python](https://pypi.org/project/opencv-python/)
 For image manipulation/detection I use OpenCV-Python. By using OpenCV-Python we can get the color of a certain pixels. With the color we can decide if there is a shiny Pokémon or not.
 

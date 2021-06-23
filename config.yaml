@@ -1,0 +1,11 @@
+# Shinyhunter only has control support for the letters of the alphabet.
+# abcdefghijklmnopqrstuvwxyz
+controls:
+  up: w
+  down: s
+  left: a
+  right: d
+  gba-a: q
+config:
+  bag-items: 50
+  heal-item: berry juice
